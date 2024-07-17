@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+mpesa:
+  daraja:
+    consumer-key: JiQPZnHrn0TkftZAvWZrj2ibuFsuxCRfZxA8eUX0T6r9YTud
+    consumer-secret: sp0Bao3jdWpd5Z3kAuAFKzOQxYTK8LuYRT3Igg8CbiA42OOvvAQiRLzry5YAnN40
+    grant-type: client_credentials
+    oauth-endpoint:  https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web:
+          client: DEBUG
+
