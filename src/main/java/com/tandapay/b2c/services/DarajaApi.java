@@ -1,7 +1,6 @@
 package com.tandapay.b2c.services;
 
-import com.tandapay.b2c.dtos.AccessTokenResponse;
-import com.tandapay.b2c.dtos.RegisterUrlResponse;
+import com.tandapay.b2c.dtos.*;
 
 public interface DarajaApi {
 
@@ -10,4 +9,7 @@ public interface DarajaApi {
      */
     AccessTokenResponse getAccessToken();
     RegisterUrlResponse registerUrl();
+    B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest);
+
+    TransactionStatusSyncResponse getTransactionResult(InternalTransactionStatusRequest internalTransactionStatusRequest);
 }

@@ -2,9 +2,7 @@ package com.tandapay.b2c.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tandapay.b2c.config.MpesaConfiguration;
-import com.tandapay.b2c.dtos.AccessTokenResponse;
-import com.tandapay.b2c.dtos.RegisterUrlRequest;
-import com.tandapay.b2c.dtos.RegisterUrlResponse;
+import com.tandapay.b2c.dtos.*;
 import com.tandapay.b2c.utils.HelperUtility;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -93,5 +91,88 @@ public class DarajaApiImpl implements DarajaApi {
             log.error(String.format("Could not register url -> %s", e.getLocalizedMessage()));
             return null;
         }
+    }
+    @Override
+    public B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest) {
+        AccessTokenResponse accessTokenResponse = getAccessToken();
+        log.info(String.format("Access Token: %s", accessTokenResponse.getAccessToken()));
+
+        B2CTransactionRequest b2CTransactionRequest = new B2CTransactionRequest();
+
+        b2CTransactionRequest.setCommandID(internalB2CTransactionRequest.getCommandID());
+        b2CTransactionRequest.setAmount(internalB2CTransactionRequest.getAmount());
+        b2CTransactionRequest.setPartyB(internalB2CTransactionRequest.getPartyB());
+        b2CTransactionRequest.setRemarks(internalB2CTransactionRequest.getRemarks());
+        b2CTransactionRequest.setOccassion(internalB2CTransactionRequest.getOccassion());
+
+        // get the security credentials ...
+        b2CTransactionRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
+
+        log.info(String.format("Security Creds: %s", b2CTransactionRequest.getSecurityCredential()));
+
+        // set the result url ...
+        b2CTransactionRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
+        b2CTransactionRequest.setQueueTimeOutURL(mpesaConfiguration.getB2cQueueTimeoutUrl());
+        b2CTransactionRequest.setInitiatorName(mpesaConfiguration.getB2cInitiatorName());
+        b2CTransactionRequest.setPartyA(mpesaConfiguration.getShortCode());
+
+
+        RequestBody body = RequestBody.create(
+                Objects.requireNonNull(HelperUtility.toJson(b2CTransactionRequest)),JSON_MEDIA_TYPE);
+
+        Request request = new Request.Builder()
+                .url(mpesaConfiguration.getB2cTransactionEndpoint())
+                .post(body)
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s", accessTokenResponse.getAccessToken()))
+                .build();
+
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+
+            return objectMapper.readValue(response.body().string(), B2CTransactionSyncResponse.class);
+        } catch (IOException e) {
+            log.error(String.format("Could not perform B2C transaction ->%s", e.getLocalizedMessage()));
+            return null;
+        }
+
+    }
+    @Override
+    public TransactionStatusSyncResponse getTransactionResult(InternalTransactionStatusRequest internalTransactionStatusRequest) {
+
+        TransactionStatusRequest transactionStatusRequest = new TransactionStatusRequest();
+        transactionStatusRequest.setTransactionID(internalTransactionStatusRequest.getTransactionID());
+
+        transactionStatusRequest.setInitiator(mpesaConfiguration.getB2cInitiatorName());
+        transactionStatusRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
+        transactionStatusRequest.setCommandID(TRANSACTION_STATUS_QUERY_COMMAND);
+        transactionStatusRequest.setPartyA(mpesaConfiguration.getShortCode());
+        transactionStatusRequest.setIdentifierType(SHORT_CODE_IDENTIFIER);
+        transactionStatusRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
+        transactionStatusRequest.setQueueTimeOutURL(mpesaConfiguration.getB2cQueueTimeoutUrl());
+        transactionStatusRequest.setRemarks(TRANSACTION_STATUS_VALUE);
+        transactionStatusRequest.setOccasion(TRANSACTION_STATUS_VALUE);
+
+        AccessTokenResponse accessTokenResponse = getAccessToken();
+
+        RequestBody body = RequestBody.create(
+                Objects.requireNonNull(HelperUtility.toJson(transactionStatusRequest)),JSON_MEDIA_TYPE);
+
+        Request request = new Request.Builder()
+                .url(mpesaConfiguration.getTransactionResultUrl())
+                .post(body)
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s", accessTokenResponse.getAccessToken()))
+                .build();
+
+        try {
+            Response response = okHttpClient.newCall(request).execute();
+            // use Jackson to Decode the ResponseBody ...
+
+            return objectMapper.readValue(response.body().string(), TransactionStatusSyncResponse.class);
+        } catch (IOException e) {
+            log.error(String.format("Could not fetch transaction result -> %s", e.getLocalizedMessage()));
+            return null;
+        }
+
+
     }
 }

@@ -17,6 +17,12 @@ public class MpesaConfiguration {
     private String confirmationURL;
     private String validationURL;
     private String responseType;
+    private String b2cTransactionEndpoint;
+    private String b2cResultUrl;
+    private String b2cQueueTimeoutUrl;
+    private String b2cInitiatorName;
+    private String b2cInitiatorPassword;
+    private String transactionResultUrl;
     @Override
     public String toString() {
         return String.format("{consumerKey='%s', consumerSecret='%s', grantType='%s', oauthEndpoint='%s'}",
