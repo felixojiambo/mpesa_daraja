@@ -2,10 +2,12 @@ package com.tandapay.b2c.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
-import lombok.SneakyThrows;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AccessTokenResponse {
 
     @JsonProperty("access_token")
