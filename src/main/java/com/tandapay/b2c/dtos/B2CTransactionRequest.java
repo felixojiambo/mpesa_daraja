@@ -4,16 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class B2CTransactionRequest{
-
-	@JsonProperty("QueueTimeOutURL")
-	private String queueTimeOutURL;
-
-	@JsonProperty("Remarks")
-	private String remarks;
-
-	@JsonProperty("Amount")
-	private String amount;
+public class B2CTransactionRequest {
 
 	@JsonProperty("InitiatorName")
 	private String initiatorName;
@@ -21,11 +12,11 @@ public class B2CTransactionRequest{
 	@JsonProperty("SecurityCredential")
 	private String securityCredential;
 
-	@JsonProperty("Occassion")
-	private String occassion;
-
 	@JsonProperty("CommandID")
 	private String commandID;
+
+	@JsonProperty("Amount")
+	private String amount;
 
 	@JsonProperty("PartyA")
 	private String partyA;
@@ -33,6 +24,15 @@ public class B2CTransactionRequest{
 	@JsonProperty("PartyB")
 	private String partyB;
 
+	@JsonProperty("Remarks")
+	private String remarks;
+
+	@JsonProperty("QueueTimeOutURL")
+	private String queueTimeOutURL;
+
 	@JsonProperty("ResultURL")
 	private String resultURL;
+
+	@JsonProperty("Occassion")
+	private String occassion;
 }

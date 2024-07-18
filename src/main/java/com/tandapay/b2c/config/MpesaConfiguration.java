@@ -23,6 +23,7 @@ public class MpesaConfiguration {
     private String b2cInitiatorName;
     private String b2cInitiatorPassword;
     private String transactionResultUrl;
+
     @Override
     public String toString() {
         return String.format("{consumerKey='%s', consumerSecret='%s', grantType='%s', oauthEndpoint='%s'}",

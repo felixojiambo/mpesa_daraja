@@ -9,7 +9,7 @@ public interface DarajaApi {
      */
     AccessTokenResponse getAccessToken();
     RegisterUrlResponse registerUrl();
-    B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest);
+    CommonSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest);
 
     TransactionStatusSyncResponse getTransactionResult(InternalTransactionStatusRequest internalTransactionStatusRequest);
 }

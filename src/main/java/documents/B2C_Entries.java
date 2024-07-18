@@ -23,7 +23,7 @@ public class B2C_Entries {
 
     @Indexed(unique = true)
     private String conversationId;
-
+    private String billRefNumber;
     @Indexed(unique = true)
     private String originatorConversationId;
 
@@ -31,5 +31,5 @@ public class B2C_Entries {
 
     private String resultCode;
 
-    private String rawCallbackPayloadResponse;
+    private Object rawCallbackPayloadResponse;
 }

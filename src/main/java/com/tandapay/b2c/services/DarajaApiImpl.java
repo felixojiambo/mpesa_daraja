@@ -37,8 +37,8 @@ public class DarajaApiImpl implements DarajaApi {
         Request request = new Request.Builder()
                 .url(String.format("%s?grant_type=%s", mpesaConfiguration.getOauthEndpoint(), mpesaConfiguration.getGrantType()))
                 .get()
-                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s %s", BASIC_AUTH_STRING, encodedCredentials))
-                .addHeader(CACHE_CONTROL_HEADER, CACHE_CONTROL_HEADER_VALUE)
+                .addHeader("Authorization", String.format("Basic %s", encodedCredentials))
+                .addHeader("Cache-Control", "no-cache")
                 .build();
 
         int retryCount = 3;
@@ -50,17 +50,24 @@ public class DarajaApiImpl implements DarajaApi {
                     return objectMapper.readValue(responseBody, AccessTokenResponse.class);
                 } else {
                     log.error("Failed to get access token, response code: {}", response.code());
-                    return new AccessTokenResponse(null, null);
+                    return AccessTokenResponse.builder()
+                            .errorCode(String.valueOf(response.code()))
+                            .errorMessage(response.message())
+                            .build();
                 }
             } catch (IOException e) {
                 log.error("Attempt {} - Could not get access token. -> {}", (3 - retryCount + 1), e.getLocalizedMessage(), e);
                 retryCount--;
                 if (retryCount == 0) {
-                    return new AccessTokenResponse(null, null);
+                    return AccessTokenResponse.builder()
+                            .errorMessage("Failed to get access token after 3 attempts.")
+                            .build();
                 }
             }
         }
-        return new AccessTokenResponse(null, null);
+        return AccessTokenResponse.builder()
+                .errorMessage("Unknown error occurred while getting access token.")
+                .build();
     }
 
     @Override
@@ -93,48 +100,39 @@ public class DarajaApiImpl implements DarajaApi {
         }
     }
     @Override
-    public B2CTransactionSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest) {
+    public CommonSyncResponse performB2CTransaction(InternalB2CTransactionRequest internalB2CTransactionRequest) {
         AccessTokenResponse accessTokenResponse = getAccessToken();
-        log.info(String.format("Access Token: %s", accessTokenResponse.getAccessToken()));
+        log.info("Access Token: {}", accessTokenResponse.getAccessToken());
 
         B2CTransactionRequest b2CTransactionRequest = new B2CTransactionRequest();
-
         b2CTransactionRequest.setCommandID(internalB2CTransactionRequest.getCommandID());
         b2CTransactionRequest.setAmount(internalB2CTransactionRequest.getAmount());
         b2CTransactionRequest.setPartyB(internalB2CTransactionRequest.getPartyB());
         b2CTransactionRequest.setRemarks(internalB2CTransactionRequest.getRemarks());
         b2CTransactionRequest.setOccassion(internalB2CTransactionRequest.getOccassion());
-
-        // get the security credentials ...
         b2CTransactionRequest.setSecurityCredential(HelperUtility.getSecurityCredentials(mpesaConfiguration.getB2cInitiatorPassword()));
-
-        log.info(String.format("Security Creds: %s", b2CTransactionRequest.getSecurityCredential()));
-
-        // set the result url ...
         b2CTransactionRequest.setResultURL(mpesaConfiguration.getB2cResultUrl());
         b2CTransactionRequest.setQueueTimeOutURL(mpesaConfiguration.getB2cQueueTimeoutUrl());
         b2CTransactionRequest.setInitiatorName(mpesaConfiguration.getB2cInitiatorName());
         b2CTransactionRequest.setPartyA(mpesaConfiguration.getShortCode());
 
+        log.info("B2C Transaction Request: {}", b2CTransactionRequest);
 
-        RequestBody body = RequestBody.create(
-                Objects.requireNonNull(HelperUtility.toJson(b2CTransactionRequest)),JSON_MEDIA_TYPE);
-
+        RequestBody body = RequestBody.create(Objects.requireNonNull(HelperUtility.toJson(b2CTransactionRequest)), JSON_MEDIA_TYPE);
         Request request = new Request.Builder()
                 .url(mpesaConfiguration.getB2cTransactionEndpoint())
                 .post(body)
-                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("%s", accessTokenResponse.getAccessToken()))
+                .addHeader(AUTHORIZATION_HEADER_STRING, String.format("Bearer %s", accessTokenResponse.getAccessToken()))
                 .build();
 
-        try {
-            Response response = okHttpClient.newCall(request).execute();
-
-            return objectMapper.readValue(response.body().string(), B2CTransactionSyncResponse.class);
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            String responseBody = response.body().string();
+            log.info("B2C Transaction Response: {}", responseBody);
+            return objectMapper.readValue(responseBody, CommonSyncResponse.class);
         } catch (IOException e) {
-            log.error(String.format("Could not perform B2C transaction ->%s", e.getLocalizedMessage()));
+            log.error("Could not perform B2C transaction -> {}", e.getLocalizedMessage());
             return null;
         }
-
     }
     @Override
     public TransactionStatusSyncResponse getTransactionResult(InternalTransactionStatusRequest internalTransactionStatusRequest) {
@@ -175,4 +173,6 @@ public class DarajaApiImpl implements DarajaApi {
 
 
     }
+
+
 }

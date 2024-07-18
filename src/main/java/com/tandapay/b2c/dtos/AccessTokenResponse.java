@@ -15,7 +15,9 @@ public class AccessTokenResponse {
 
     @JsonProperty("expires_in")
     private String expiresIn;
-
+    private String requestId;
+    private String errorCode;
+    private String errorMessage;
     @SneakyThrows
     @Override
     public String toString() {
