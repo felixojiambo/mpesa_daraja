@@ -37,7 +37,12 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-core</artifactId>
 			<version>6.3.1</version>
-		</dependency>
+		</dependency><dependency>
+		<groupId>io.springfox</groupId>
+		<artifactId>springfox-boot-starter</artifactId>
+		<version>3.0.0</version>
+	</dependency>
+
 		<!-- Replace Springfox with Springdoc OpenAPI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -90,6 +95,11 @@
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
 			<version>1.19.8</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-spring-web</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 

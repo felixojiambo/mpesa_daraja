@@ -32,4 +32,16 @@ public class B2C_Entries {
     private String resultCode;
 
     private Object rawCallbackPayloadResponse;
+
+    private String status;
+    private String details;
+    public void setStatus(String responseDescription) {
+    }
+
+    public void setDetails(String string) {
+    }
+
+    public B2C_Entries orElse(Object o) {
+        return null;
+    }
 }

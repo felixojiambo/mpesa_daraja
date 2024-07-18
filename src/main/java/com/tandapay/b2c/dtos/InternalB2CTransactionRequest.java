@@ -8,7 +8,7 @@ public class InternalB2CTransactionRequest{
 
 	@JsonProperty("Remarks")
 	private String remarks;
-
+	private String transactionId;
 	@JsonProperty("Amount")
 	private String amount;
 
@@ -20,4 +20,5 @@ public class InternalB2CTransactionRequest{
 
 	@JsonProperty("PartyB")
 	private String partyB;
+
 }
